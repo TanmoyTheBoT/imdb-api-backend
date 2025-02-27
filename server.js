@@ -15,7 +15,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Adjust for production: set your frontend domain
+    origin: process.env.CORS_ORIGIN || "*", // Adjust for production: set your frontend domain
     methods: ["GET", "POST"]
   }
 });
