@@ -86,9 +86,17 @@ io.on("connection", (socket) => {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Your API Key",
-        text: `Hello ${firstName},\n\nYour API key is: ${apiKey}\n\nKeep it secure!`
-      });
+        subject: "Your FMDb API Key",
+        html: `
+          <p>Hello <strong>${firstName}</strong>,</p>
+          <p>Your <strong>API key</strong> is: <code>${apiKey}</code></p>
+          <p><strong>Keep it secure and do not share it.</strong></p>
+          <p>To use it, append it to all your API requests:</p>
+          https://fmdbapi.vercel.app/?i=tt0111161&apikey=${apiKey}
+
+          <p>Best regards,<br><strong>The FMDb Team</strong></p>
+        `
+      });      
 
       // Emit success response back to the client
       socket.emit("registrationResponse", {
