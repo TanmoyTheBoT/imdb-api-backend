@@ -58,22 +58,31 @@ const transporter = nodemailer.createTransport({
 
 
 io.on("connection", async (socket) => {
-  const clientIp = socket.handshake.address; // Get Client IP Address
+  // Use x-forwarded-for if available; otherwise fallback to socket.handshake.address
+  let clientIp = socket.handshake.headers["x-forwarded-for"] 
+    ? socket.handshake.headers["x-forwarded-for"].split(",")[0].trim() 
+    : socket.handshake.address;
 
   try {
-    // Fetch location data using ip-api.com
+    // Fetch location data from ip-api.com using the cleaned IP
     const { data } = await axios.get(`http://ip-api.com/json/${clientIp}`);
 
-    console.log(`Client connected: ${socket.id}, IP: ${clientIp}, Location: ${data.city}, ${data.country}, ISP: ${data.isp}`);
-
-    // Send location info to the client
-    socket.emit("locationInfo", {
-      ip: clientIp,
-      city: data.city,
-      region: data.regionName,
-      country: data.country,
-      isp: data.isp
-    });
+    if (data.status === "success") {
+      console.log(
+        `Client connected: ${socket.id}, IP: ${clientIp}, Location: ${data.city}, ${data.country}, ISP: ${data.isp}`
+      );
+      socket.emit("locationInfo", {
+        ip: clientIp,
+        city: data.city,
+        region: data.regionName,
+        country: data.country,
+        isp: data.isp
+      });
+    } else {
+      console.log(
+        `Client connected: ${socket.id}, IP: ${clientIp}, Location: unavailable (API response: ${data.message})`
+      );
+    }
   } catch (error) {
     console.error("Error fetching location:", error);
   }
