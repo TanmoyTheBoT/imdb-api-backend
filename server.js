@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -6,11 +7,12 @@ const mysql = require("mysql2/promise");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const cors = require("cors");
-const axios = require("axios"); 
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 app.get("/", (req, res) => {
   res.send("The FMDb API Server - Status: Running");
 });
@@ -34,8 +36,8 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-
 });
+
 // ✅ Check database connection when the server starts
 pool.getConnection()
   .then(conn => {
@@ -45,7 +47,7 @@ pool.getConnection()
   .catch(err => {
     console.error("❌ MySQL connection error:", err);
   });
-  
+
 // Configure Nodemailer with Gmail SMTP (using an App Password)
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -54,8 +56,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS    // your Gmail App Password
   }
 });
-
-
 
 io.on("connection", async (socket) => {
   // Use x-forwarded-for if available; otherwise fallback to socket.handshake.address
@@ -87,11 +87,9 @@ io.on("connection", async (socket) => {
     console.error("Error fetching location:", error);
   }
 
-
-
   // Listen for "register" event from client
   socket.on("register", async (data) => {
-    const { firstName, lastName, email , use_case } = data;
+    const { firstName, lastName, email, use_case } = data;
     
     // Basic validation
     if (!firstName || !lastName || !email || !use_case) {
@@ -122,7 +120,7 @@ io.on("connection", async (socket) => {
       // Insert the new user into the database
       await pool.execute(
         "INSERT INTO users (first_name, last_name, email, api_key, use_case) VALUES (?, ?, ?, ?, ?)",
-        [firstName, lastName, email, apiKey , use_case]
+        [firstName, lastName, email, apiKey, use_case]
       );
 
       // Send the API key via email
@@ -152,7 +150,6 @@ io.on("connection", async (socket) => {
     console.log(`Client disconnected: ${socket.id}, IP: ${clientIp}`);
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
