@@ -10,7 +10,6 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 // Create HTTP server and attach Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -31,17 +30,17 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 
-});
-// ✅ Check database connection when the server starts
+})
+
 pool.getConnection()
   .then(conn => {
-    console.log("✅ Connected to MySQL database");
+    console.log("Connected to MySQL database");
     conn.release();
   })
   .catch(err => {
-    console.error("❌ MySQL connection error:", err);
+    console.error("MySQL connection error:", err);
   });
-  
+
 // Configure Nodemailer with Gmail SMTP (using an App Password)
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -51,30 +50,9 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const axios = require("axios"); // Make sure you install it: npm install axios
-
-io.on("connection", async (socket) => {
-  const clientIp = socket.handshake.address; // Get Client IP Address
-
-  try {
-    // Fetch location data using ip-api.com
-    const { data } = await axios.get(`http://ip-api.com/json/${clientIp}`);
-
-    console.log(`Client connected: ${socket.id}, IP: ${clientIp}, Location: ${data.city}, ${data.country}, ISP: ${data.isp}`);
-
-    // Send location info to the client
-    socket.emit("locationInfo", {
-      ip: clientIp,
-      city: data.city,
-      region: data.regionName,
-      country: data.country,
-      isp: data.isp
-    });
-  } catch (error) {
-    console.error("Error fetching location:", error);
-  }
-
-
+// Socket.io connection: Listen for clients
+io.on("connection", (socket) => {
+  console.log("Client connected: " + socket.id);
 
   // Listen for "register" event from client
   socket.on("register", async (data) => {
@@ -136,10 +114,9 @@ io.on("connection", async (socket) => {
 
   // Log client disconnect
   socket.on("disconnect", () => {
-    console.log(`Client disconnected: ${socket.id}, IP: ${clientIp}`);
+    console.log("Client disconnected: " + socket.id);
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
