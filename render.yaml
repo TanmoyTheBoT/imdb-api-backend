@@ -1,9 +1,8 @@
 services:
   - type: web
     name: fmdb-api-backend
-    runtime: node
-    buildCommand: npm install
-    startCommand: node server.js
-    healthCheckPath: /
+    runtime: docker
+    repo: https://github.com/TanmoyTheBoT/imdb-api-backend.git
+    branch: main
     plan: free
     autoDeploy: true
