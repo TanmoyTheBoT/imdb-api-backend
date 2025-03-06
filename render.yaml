@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: fmdb-api-backend
-    runtime: docker
-    repo: https://github.com/TanmoyTheBoT/imdb-api-backend.git
-    branch: main
-    plan: free
-    autoDeploy: true
