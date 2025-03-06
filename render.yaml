@@ -1,19 +1,9 @@
-# render.yml
-
 services:
   - type: web
-    plan: free
     name: fmdb-api-backend
-    env: node
-    nodeVersion: 18.x
+    runtime: node
     buildCommand: npm install
     startCommand: node server.js
-    
     healthCheckPath: /
+    plan: free
     autoDeploy: true
-    instanceType: free
-
-
-
-
-    
